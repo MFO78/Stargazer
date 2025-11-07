@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StarGazer - Premium astronomy weather companion with accurate observation recommendations">
+    <title>StarGazer v4.2 - Premium Astronomy Companion</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- SunCalc -->
+    <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+    
+    <style>
+        /* ========================================
+           MODERN COSMIC DESIGN SYSTEM
+           ======================================== */
+        
+        :root {
+            /* Cosmic Color Palette */
+            --space-black: #05070d;
+            --deep-space: #0a0e1a;
+            --cosmic-blue: #1a1f3a;
+            --nebula-purple: #2d1b4e;
+            --star-white: #ffffff;
+            --stellar-blue: #4d7cff;
+            --cosmic-cyan: #00d4ff;
+            --aurora-green: #00ff88;
+            --galaxy-purple: #a855f7;
+            --meteor-orange: #ff6b35;
+            --moon-silver: #c4c4d9;
+            --text-dim: #8e9aaf;
+            
+            /* Gradients */
+            --gradient-cosmic: linear-gradient(135deg, #4d7cff 0%, #a855f7 100%);
+            --gradient-aurora: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+            --gradient-nebula: linear-gradient(135deg, #2d1b4e 0%, #1a1f3a 100%);
+            
+            /* Shadows & Glows */
+            --glow-blue: 0 0 30px rgba(77, 124, 255, 0.5);
+            --glow-purple: 0 0 30px rgba(168, 85, 247, 0.5);
+            --shadow-deep: 0 10px 40px rgba(0, 0, 0, 0.6);
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            
+            /* Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+        }
+        
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            background: var(--space-black);
+            color: var(--star-white);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent),
+                radial-gradient(2px 2px at 90% 60%, white, transparent),
+                radial-gradient(1px 1px at 33% 80%, white, transparent),
+                radial-gradient(1px 1px at 15% 90%, white, transparent);
+            background-size: 200% 200%;
+            background-position: 0 0, 40% 60%, 70% 30%, 90% 80%, 20% 90%, 60% 15%, 85% 50%;
+            opacity: 0.3;
+            animation: twinkle 180s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* ========================================
+           LAYOUT
+           ======================================== */
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--space-md);
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+        
+        .grid {
+            display: grid;
+            gap: var(--space-lg);
+        }
+        
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+        }
+        
+        .col-12 { grid-column: span 12; }
+        .col-8 { grid-column: span 12; }
+        .col-6 { grid-column: span 12; }
+        .col-4 { grid-column: span 12; }
+        
+        @media (min-width: 1024px) {
+            .col-8 { grid-column: span 8; }
+            .col-6 { grid-column: span 6; }
+            .col-4 { grid-column: span 4; }
+        }
+        
+        /* ========================================
+           HEADER
+           ======================================== */
+        
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-lg) 0;
+        }
+        
+        .logo {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            background: var(--gradient-cosmic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-sm);
+            letter-spacing: -0.02em;
+            text-shadow: var(--glow-blue);
+        }
+        
+        .tagline {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--moon-silver);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        
+        /* ========================================
+           CARDS
+           ======================================== */
+        
+        .glass-card {
+            background: rgba(26, 31, 58, 0.4);
+            border: 1px solid rgba(77, 124, 255, 0.2);
+            border-radius: 20px;
+            padding: var(--space-lg);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-deep);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-cosmic);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(77, 124, 255, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(77, 124, 255, 0.2);
+        }
+        
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-cosmic);
+            border-radius: 12px;
+            font-size: 1.25rem;
+            box-shadow: var(--glow-blue);
+        }
+        
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--star-white);
+        }
+        
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+        }
+        
+        /* ========================================
+           LOCATION INPUT
+           ======================================== */
+        
+        .location-panel {
+            background: var(--gradient-nebula);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        
+        .input-grid {
+            display: grid;
+            gap: var(--space-md);
+            grid-template-columns: 1fr;
+        }
+        
+        @media (min-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr 200px;
+            }
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--stellar-blue);
+            font-size: 1.125rem;
+            pointer-events: none;
+        }
+        
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: var(--space-md) var(--space-md) var(--space-md) 3.5rem;
+            background: rgba(5, 7, 13, 0.6);
+            border: 2px solid rgba(77, 124, 255, 0.3);
+            border-radius: 12px;
+            color: var(--star-white);
+            font-size: 1rem;
+            font-family: var(--font-primary);
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--stellar-blue);
+            box-shadow: 0 0 0 4px rgba(77, 124, 255, 0.1);
+        }
+        
+        input::placeholder {
+            color: var(--text-dim);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-top: var(--space-md);
+        }
+        
+        .btn {
+            padding: var(--space-md) var(--space-lg);
+            background: var(--gradient-cosmic);
+            color: var(--star-white);
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            box-shadow: var(--glow-blue);
+            flex: 1;
+            justify-content: center;
+            min-width: 180px;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(77, 124, 255, 0.4);
+        }
+        
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* ========================================
+           ALERTS
+           ======================================== */
+        
+        .alert {
+            padding: var(--space-md);
+            border-radius: 12px;
+            margin-top: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--aurora-green);
+        }
+        
+        .alert-warning {
+            background: rgba(255, 212, 0, 0.1);
+            border: 1px solid rgba(255, 212, 0, 0.3);
+            color: #ffd400;
+        }
+        
+        .alert-error {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: var(--meteor-orange);
+        }
+        
+        /* ========================================
+           RECOMMENDATION PANEL
+           ======================================== */
+        
+        .recommendation-panel {
+            background: var(--gradient-aurora);
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recommendation-panel::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .score-display {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .score-number {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 10vw, 6rem);
+            font-weight: 800;
+            color: var(--star-white);
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: var(--space-sm);
+            display: inline-block;
+            padding: var(--space-xs) var(--space-md);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+        
+        .score-description {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: var(--space-md);
+            font-weight: 400;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+        
+        .metric-item {
+            text-align: center;
+            padding: var(--space-md);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--star-white);
+            display: block;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: var(--space-xs);
+        }
+        
+        /* ========================================
+           DATA DISPLAYS
+           ======================================== */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: var(--space-lg);
+            background: rgba(5, 7, 13, 0.4);
+            border: 1px solid rgba(77, 124, 255, 0.2);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-box:hover {
+            background: rgba(77, 124, 255, 0.1);
+            border-color: var(--stellar-blue);
+            transform: scale(1.05);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cosmic-cyan);
+            display: block;
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-display);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-unit {
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+        
+        /* ========================================
+           CHART STYLING
+           ======================================== */
+        
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(5, 7, 13, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(77, 124, 255, 0.2);
+        }
+        
+        /* ========================================
+           MOON DISPLAY
+           ======================================== */
+        
+        .moon-display {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .moon-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-md);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+        }
+        
+        .moon-phase {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cosmic-cyan);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .moon-name {
+            font-size: 1.25rem;
+            color: var(--moon-silver);
+            font-weight: 500;
+        }
+        
+        /* ========================================
+           FORECAST CARDS
+           ======================================== */
+        
+        .forecast-scroll {
+            overflow-x: auto;
+            padding-bottom: var(--space-md);
+            scrollbar-width: thin;
+            scrollbar-color: var(--stellar-blue) transparent;
+        }
+        
+        .forecast-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .forecast-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .forecast-scroll::-webkit-scrollbar-thumb {
+            background: var(--stellar-blue);
+            border-radius: 10px;
+        }
+        
+        .forecast-grid {
+            display: flex;
+            gap: var(--space-md);
+            min-width: max-content;
+        }
+        
+        .forecast-card {
+            min-width: 160px;
+            padding: var(--space-lg);
+            background: rgba(5, 7, 13, 0.6);
+            border: 1px solid rgba(77, 124, 255, 0.2);
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .forecast-card:hover {
+            border-color: var(--stellar-blue);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(77, 124, 255, 0.2);
+        }
+        
+        .forecast-date {
+            font-weight: 600;
+            color: var(--moon-silver);
+            margin-bottom: var(--space-sm);
+            font-size: 0.875rem;
+        }
+        
+        .forecast-icon {
+            font-size: 2.5rem;
+            margin: var(--space-sm) 0;
+        }
+        
+        .forecast-quality {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: var(--space-sm) 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .quality-excellent {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--aurora-green);
+        }
+        
+        .quality-good {
+            background: rgba(77, 124, 255, 0.2);
+            color: var(--stellar-blue);
+        }
+        
+        .quality-fair {
+            background: rgba(255, 212, 0, 0.2);
+            color: #ffd400;
+        }
+        
+        .quality-poor {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--meteor-orange);
+        }
+        
+        .forecast-temp {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--star-white);
+            margin: var(--space-xs) 0;
+        }
+        
+        .forecast-details {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        
+        /* ========================================
+           FOOTER
+           ======================================== */
+        
+        .footer {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            margin-top: var(--space-xl);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .footer-text {
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .footer-link {
+            color: var(--stellar-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--cosmic-cyan);
+        }
+        
+        /* ========================================
+           UTILITIES
+           ======================================== */
+        
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .attribution {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: var(--space-md);
+        }
+        
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">STARGAZER</h1>
+            <p class="tagline">Premium Astronomy Companion</p>
+        </header>
+        
+        <!-- Location Panel -->
+        <div class="col-12">
+            <div class="glass-card location-panel">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Observation Location</h2>
+                        <p class="card-subtitle">Set your location and date for personalized astronomy data</p>
+                    </div>
+                </div>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <i class="fas fa-search input-icon"></i>
+                        <input 
+                            type="text" 
+                            id="locationInput" 
+                            placeholder="Enter city or coordinates (lat,lon)..."
+                        >
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-calendar input-icon"></i>
+                        <input type="date" id="dateInput">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn" id="searchBtn" onclick="searchLocation()">
+                        <i class="fas fa-search"></i>
+                        Search Location
+                    </button>
+                    <button class="btn btn-secondary" id="geolocateBtn" onclick="getCurrentLocation()">
+                        <i class="fas fa-crosshairs"></i>
+                        Use My Location
+                    </button>
+                </div>
+                
+                <div id="alertContainer"></div>
+            </div>
+        </div>
+        
+        <!-- Recommendation Panel -->
+        <div class="col-12" id="recommendationSection" style="display: none;">
+            <div class="glass-card recommendation-panel">
+                <div class="score-display">
+                    <div class="score-number" id="overallScore">--</div>
+                    <div class="score-label" id="scoreLabel">Calculating...</div>
+                    <p class="score-description" id="recommendationText">Analyzing astronomical conditions...</p>
+                </div>
+                <div class="metrics-grid" id="recommendationDetails"></div>
+            </div>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="grid">
+            <!-- Weather Card -->
+            <div class="col-4">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title">Weather</h2>
+                            <p class="card-subtitle">Current conditions</p>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="temperature">--</span><span class="stat-unit">°</span></span>
+                            <span class="stat-label">Temp</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="humidity">--</span><span class="stat-unit">%</span></span>
+                            <span class="stat-label">Humidity</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="windSpeed">--</span></span>
+                            <span class="stat-label">Wind km/h</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="cloudCover">--</span><span class="stat-unit">%</span></span>
+                            <span class="stat-label">Clouds</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="dewPoint">--</span><span class="stat-unit">°</span></span>
+                            <span class="stat-label">Dew Point</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="pressure">--</span></span>
+                            <span class="stat-label">Pressure</span>
+                        </div>
+                    </div>
+                    <p class="attribution">Data from Open-Meteo</p>
+                </div>
+            </div>
+            
+            <!-- Cloud Chart -->
+            <div class="col-8">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-area"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title">24-Hour Forecast</h2>
+                            <p class="card-subtitle">Cloud cover & visibility</p>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="skyQualityChart"></canvas>
+                    </div>
+                    <p class="attribution">Hourly predictions from Open-Meteo</p>
+                </div>
+            </div>
+            
+            <!-- Sun Times -->
+            <div class="col-6">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title">Sun & Twilight</h2>
+                            <p class="card-subtitle">Darkness windows</p>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-value" id="sunrise">--:--</span>
+                            <span class="stat-label">Sunrise</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="sunset">--:--</span>
+                            <span class="stat-label">Sunset</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="duskCivil">--:--</span>
+                            <span class="stat-label">Civil Dusk</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="duskNautical">--:--</span>
+                            <span class="stat-label">Nautical</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="duskAstronomical">--:--</span>
+                            <span class="stat-label">Astronomical</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="dawnAstronomical">--:--</span>
+                            <span class="stat-label">Dawn</span>
+                        </div>
+                    </div>
+                    <p class="attribution">Calculated with SunCalc</p>
+                </div>
+            </div>
+            
+            <!-- Moon -->
+            <div class="col-6">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title">Lunar Data</h2>
+                            <p class="card-subtitle">Moon phase & position</p>
+                        </div>
+                    </div>
+                    <div class="moon-display">
+                        <div class="moon-icon" id="moonPhaseIcon">🌙</div>
+                        <div class="moon-phase" id="moonIllumination">--</div>
+                        <div class="moon-name" id="moonPhaseName">Loading...</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-value" id="moonrise">--:--</span>
+                            <span class="stat-label">Moonrise</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="moonset">--:--</span>
+                            <span class="stat-label">Moonset</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value"><span id="moonAltitude">--</span><span class="stat-unit">°</span></span>
+                            <span class="stat-label">Altitude</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="moonDistance">--</span>
+                            <span class="stat-label">Distance km</span>
+                        </div>
+                    </div>
+                    <p class="attribution">Calculated with SunCalc</p>
+                </div>
+            </div>
+            
+            <!-- 7-Day Forecast -->
+            <div class="col-12">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div>
+                            <h2 class="card-title">7-Day Forecast</h2>
+                            <p class="card-subtitle">Extended planning outlook</p>
+                        </div>
+                    </div>
+                    <div class="forecast-scroll">
+                        <div class="forecast-grid" id="extendedForecast"></div>
+                    </div>
+                    <p class="attribution">Extended forecast from Open-Meteo</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <h3 class="footer-title">STARGAZER v4.2</h3>
+            <p class="footer-text">
+                Powered by <a href="https://open-meteo.com" class="footer-link" target="_blank">Open-Meteo</a> & 
+                <a href="https://github.com/mourner/suncalc" class="footer-link" target="_blank">SunCalc</a>
+            </p>
+            <p class="footer-text">Real-time astronomy data • Accurate recommendations • Open source</p>
+        </footer>
+    </div>
+    
+    <script>
+        'use strict';
+        
+        // ========================================
+        // CONFIGURATION
+        // ========================================
+        
+        const CONFIG = {
+            WEATHER_API: 'https://api.open-meteo.com/v1/forecast',
+            GEOCODING_API: 'https://geocoding-api.open-meteo.com/v1/search',
+            AUTO_UPDATE_INTERVAL: 15 * 60 * 1000
+        };
+        
+        let appState = {
+            currentLocation: null,
+            weatherData: null,
+            astronomyData: null,
+            updateTimer: null,
+            chart: null
+        };
+        
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        
+        function initApp() {
+            console.log('🚀 StarGazer v4.2 initializing...');
+            
+            if (typeof SunCalc === 'undefined') {
+                showAlert('Failed to load astronomical library', 'error');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            
+            const saved = localStorage.getItem('savedLocation');
+            if (saved) {
+                try {
+                    appState.currentLocation = JSON.parse(saved);
+                    document.getElementById('locationInput').value = appState.currentLocation.name;
+                    fetchAllData();
+                } catch (e) {
+                    console.error('Error loading saved location:', e);
+                }
+            }
+            
+            setupKeyboardShortcuts();
+            initializeChart();
+            startAutoUpdate();
+            
+            console.log('✅ StarGazer ready');
+        }
+        
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                    e.preventDefault();
+                    document.getElementById('locationInput').focus();
+                }
+            });
+            
+            document.getElementById('locationInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchLocation();
+            });
+        }
+        
+        // ========================================
+        // LOCATION SERVICES
+        // ========================================
+        
+        async function searchLocation() {
+            const input = document.getElementById('locationInput').value.trim();
+            if (!input) {
+                showAlert('Please enter a location', 'warning');
+                return;
+            }
+            
+            showAlert('Searching...', 'success');
+            setLoadingState(true);
+            
+            try {
+                const coordsMatch = input.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+                
+                if (coordsMatch) {
+                    const lat = parseFloat(coordsMatch[1]);
+                    const lon = parseFloat(coordsMatch[2]);
+                    
+                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                        appState.currentLocation = { lat, lon, name: `${lat.toFixed(2)}, ${lon.toFixed(2)}` };
+                        await fetchAllData();
+                    } else {
+                        throw new Error('Invalid coordinates');
+                    }
+                } else {
+                    const location = await geocodeLocation(input);
+                    appState.currentLocation = location;
+                    await fetchAllData();
+                }
+                
+                localStorage.setItem('savedLocation', JSON.stringify(appState.currentLocation));
+                
+            } catch (error) {
+                console.error('Location error:', error);
+                showAlert(error.message || 'Location not found', 'error');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+        
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                showAlert('Geolocation not supported', 'error');
+                return;
+            }
+            
+            showAlert('Getting location...', 'success');
+            setLoadingState(true);
+            
+            const btn = document.getElementById('geolocateBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner spinner"></i> Locating...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    try {
+                        appState.currentLocation = {
+                            lat: pos.coords.latitude,
+                            lon: pos.coords.longitude,
+                            name: `${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`
+                        };
+                        
+                        document.getElementById('locationInput').value = appState.currentLocation.name;
+                        await fetchAllData();
+                        localStorage.setItem('savedLocation', JSON.stringify(appState.currentLocation));
+                        
+                    } catch (error) {
+                        showAlert('Failed to get location', 'error');
+                    } finally {
+                        btn.innerHTML = orig;
+                        btn.disabled = false;
+                        setLoadingState(false);
+                    }
+                },
+                (error) => {
+                    showAlert('Location permission denied', 'error');
+                    btn.innerHTML = orig;
+                    btn.disabled = false;
+                    setLoadingState(false);
+                }
+            );
+        }
+        
+        async function geocodeLocation(name) {
+            const url = `${CONFIG.GEOCODING_API}?name=${encodeURIComponent(name)}&count=1&language=en&format=json`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error('Geocoding failed');
+            
+            const data = await response.json();
+            if (!data.results || !data.results.length) throw new Error('Location not found');
+            
+            const result = data.results[0];
+            return {
+                lat: result.latitude,
+                lon: result.longitude,
+                name: `${result.name}${result.admin1 ? ', ' + result.admin1 : ''}${result.country ? ', ' + result.country : ''}`
+            };
+        }
+        
+        // ========================================
+        // DATA FETCHING
+        // ========================================
+        
+        async function fetchAllData() {
+            if (!appState.currentLocation) return;
+            
+            try {
+                showAlert('Loading data...', 'success');
+                
+                const weatherData = await fetchWeatherData();
+                const astronomyData = calculateAstronomyData();
+                
+                appState.weatherData = weatherData;
+                appState.astronomyData = astronomyData;
+                
+                updateWeatherDisplay(weatherData);
+                updateAstronomicalTimes(astronomyData);
+                updateLunarInfo(astronomyData);
+                updateExtendedForecast(weatherData);
+                updateChart(weatherData);
+                calculateRecommendation(weatherData, astronomyData);
+                
+                showAlert('Data loaded!', 'success');
+                setTimeout(() => document.getElementById('alertContainer').innerHTML = '', 3000);
+                
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showAlert('Failed to load data', 'error');
+            }
+        }
+        
+        async function fetchWeatherData() {
+            const { lat, lon } = appState.currentLocation;
+            
+            const params = new URLSearchParams({
+                latitude: lat,
+                longitude: lon,
+                current: 'temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,surface_pressure,wind_speed_10m',
+                hourly: 'temperature_2m,cloud_cover,wind_speed_10m',
+                daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset,cloud_cover_mean',
+                timezone: 'auto',
+                forecast_days: 7
+            });
+            
+            const response = await fetch(`${CONFIG.WEATHER_API}?${params}`);
+            if (!response.ok) throw new Error('Weather API error');
+            
+            return await response.json();
+        }
+        
+        function calculateAstronomyData() {
+            const { lat, lon } = appState.currentLocation;
+            const dateInput = document.getElementById('dateInput').value;
+            const date = dateInput ? new Date(dateInput + 'T12:00:00') : new Date();
+            
+            const sunTimes = SunCalc.getTimes(date, lat, lon);
+            const moonTimes = SunCalc.getMoonTimes(date, lat, lon);
+            const moonIllum = SunCalc.getMoonIllumination(date);
+            const moonPos = SunCalc.getMoonPosition(new Date(), lat, lon);
+            
+            return {
+                sun: {
+                    sunrise: sunTimes.sunrise,
+                    sunset: sunTimes.sunset,
+                    duskCivil: sunTimes.dusk,
+                    duskNautical: sunTimes.nauticalDusk,
+                    duskAstronomical: sunTimes.night,
+                    dawnAstronomical: sunTimes.nightEnd
+                },
+                moon: {
+                    phase: moonIllum.phase * 360,
+                    illumination: moonIllum.fraction * 100,
+                    rise: moonTimes.rise,
+                    set: moonTimes.set,
+                    altitude: moonPos.altitude * (180 / Math.PI),
+                    distance: 384400
+                }
+            };
+        }
+        
+        // ========================================
+        // UI UPDATES
+        // ========================================
+        
+        function updateWeatherDisplay(data) {
+            const c = data.current;
+            document.getElementById('temperature').textContent = Math.round(c.temperature_2m);
+            document.getElementById('humidity').textContent = Math.round(c.relative_humidity_2m);
+            document.getElementById('windSpeed').textContent = Math.round(c.wind_speed_10m);
+            document.getElementById('cloudCover').textContent = Math.round(c.cloud_cover);
+            document.getElementById('dewPoint').textContent = Math.round(c.dew_point_2m);
+            document.getElementById('pressure').textContent = Math.round(c.surface_pressure);
+        }
+        
+        function updateAstronomicalTimes(data) {
+            document.getElementById('sunrise').textContent = formatTime(data.sun.sunrise);
+            document.getElementById('sunset').textContent = formatTime(data.sun.sunset);
+            document.getElementById('duskCivil').textContent = formatTime(data.sun.duskCivil);
+            document.getElementById('duskNautical').textContent = formatTime(data.sun.duskNautical);
+            document.getElementById('duskAstronomical').textContent = formatTime(data.sun.duskAstronomical);
+            document.getElementById('dawnAstronomical').textContent = formatTime(data.sun.dawnAstronomical);
+        }
+        
+        function updateLunarInfo(data) {
+            const moon = data.moon;
+            const illum = Math.round(moon.illumination);
+            const phase = moon.phase;
+            
+            let icon, name;
+            if (phase < 22.5 || phase >= 337.5) { icon = '🌑'; name = 'New Moon'; }
+            else if (phase < 67.5) { icon = '🌒'; name = 'Waxing Crescent'; }
+            else if (phase < 112.5) { icon = '🌓'; name = 'First Quarter'; }
+            else if (phase < 157.5) { icon = '🌔'; name = 'Waxing Gibbous'; }
+            else if (phase < 202.5) { icon = '🌕'; name = 'Full Moon'; }
+            else if (phase < 247.5) { icon = '🌖'; name = 'Waning Gibbous'; }
+            else if (phase < 292.5) { icon = '🌗'; name = 'Last Quarter'; }
+            else { icon = '🌘'; name = 'Waning Crescent'; }
+            
+            document.getElementById('moonPhaseIcon').textContent = icon;
+            document.getElementById('moonIllumination').textContent = illum + '%';
+            document.getElementById('moonPhaseName').textContent = name;
+            document.getElementById('moonrise').textContent = formatTime(moon.rise);
+            document.getElementById('moonset').textContent = formatTime(moon.set);
+            document.getElementById('moonAltitude').textContent = Math.round(moon.altitude);
+            document.getElementById('moonDistance').textContent = Math.round(moon.distance).toLocaleString();
+        }
+        
+        function updateExtendedForecast(data) {
+            const container = document.getElementById('extendedForecast');
+            const daily = data.daily;
+            
+            const html = daily.time.map((dateStr, i) => {
+                const date = new Date(dateStr);
+                const cloud = Math.round(daily.cloud_cover_mean[i]);
+                const tempMax = Math.round(daily.temperature_2m_max[i]);
+                const tempMin = Math.round(daily.temperature_2m_min[i]);
+                
+                // CORRECTED: Use same algorithm as recommendation
+                const quality = 100 - cloud;
+                let qClass, qText;
+                if (quality >= 80) { qClass = 'excellent'; qText = 'Excellent'; }
+                else if (quality >= 60) { qClass = 'good'; qText = 'Good'; }
+                else if (quality >= 40) { qClass = 'fair'; qText = 'Fair'; }
+                else { qClass = 'poor'; qText = 'Poor'; }
+                
+                const icon = cloud < 20 ? '☀️' : cloud < 50 ? '⛅' : '☁️';
+                
+                return `
+                    <div class="forecast-card">
+                        <div class="forecast-date">${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                        <div class="forecast-icon">${icon}</div>
+                        <div class="forecast-quality quality-${qClass}">${qText}</div>
+                        <div class="forecast-temp">${tempMax}° / ${tempMin}°</div>
+                        <div class="forecast-details">${cloud}% clouds</div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        /**
+         * Calculate AI-powered observation recommendation with CORRECTED logic
+         * @param {Object} weather - Weather data
+         * @param {Object} astronomy - Astronomy data
+         */
+        function calculateRecommendation(weather, astronomy) {
+            const c = weather.current;
+            const moon = astronomy.moon;
+            
+            // Scoring weights (must total 1.0)
+            const weights = { 
+                cloudCover: 0.45,      // Most critical factor
+                moonPhase: 0.25,       // Affects dark sky visibility
+                humidity: 0.15,        // Equipment and seeing
+                wind: 0.15             // Stability
+            };
+            
+            // Calculate individual scores (0-100, higher is better)
+            const scores = {
+                // FIXED: Cloud Cover: 0% clouds = perfect (100), 100% clouds = worst (0)
+                cloudCover: Math.max(0, 100 - c.cloud_cover),
+                
+                // Moon Phase: 0% illumination = perfect (100), 100% = worst (0)
+                moonPhase: Math.max(0, 100 - moon.illumination),
+                
+                // Humidity: 0% = perfect (100), 100% = worst (0)
+                humidity: Math.max(0, 100 - c.relative_humidity_2m),
+                
+                // FIXED: Wind: Progressive penalty for increasing wind
+                wind: c.wind_speed_10m <= 10 ? 100 : 
+                      c.wind_speed_10m <= 20 ? 80 - ((c.wind_speed_10m - 10) * 3) :
+                      Math.max(0, 50 - ((c.wind_speed_10m - 20) * 2))
+            };
+            
+            // Calculate weighted overall score
+            let overall = 0;
+            for (const [key, weight] of Object.entries(weights)) {
+                overall += scores[key] * weight;
+            }
+            overall = Math.round(overall);
+            
+            // FIXED: Determine quality level with stricter thresholds
+            let quality, rec, qClass;
+            
+            if (overall >= 85) {
+                quality = 'EXCELLENT';
+                rec = 'Perfect conditions for deep sky observation! Ideal for faint galaxies and nebulae.';
+                qClass = 'excellent';
+            } else if (overall >= 70) {
+                quality = 'GOOD';
+                rec = 'Great night for stargazing! Good conditions for most celestial objects.';
+                qClass = 'good';
+            } else if (overall >= 50) {
+                quality = 'FAIR';
+                rec = 'Acceptable conditions for bright objects. Focus on planets, moon, and bright stars.';
+                qClass = 'fair';
+            } else if (overall >= 30) {
+                quality = 'POOR';
+                rec = 'Challenging conditions. Only bright targets visible. Consider rescheduling.';
+                qClass = 'poor';
+            } else {
+                quality = 'VERY POOR';
+                rec = 'Not suitable for observation. Wait for better conditions.';
+                qClass = 'poor';
+            }
+            
+            // Debug logging
+            console.log('=== OBSERVATION CONDITIONS DEBUG ===');
+            console.log('Raw Data:', {
+                clouds: c.cloud_cover + '%',
+                moon: Math.round(moon.illumination) + '%',
+                humidity: Math.round(c.relative_humidity_2m) + '%',
+                wind: Math.round(c.wind_speed_10m) + ' km/h'
+            });
+            console.log('Individual Scores:', scores);
+            console.log('Overall Score:', overall, '-', quality);
+            console.log('====================================');
+            
+            // Update UI
+            document.getElementById('overallScore').textContent = overall;
+            document.getElementById('scoreLabel').textContent = quality;
+            document.getElementById('scoreLabel').className = `score-label quality-${qClass}`;
+            document.getElementById('recommendationText').textContent = rec;
+            
+            // Display individual scores with color coding
+            const labels = {
+                cloudCover: 'Clear Skies',
+                moonPhase: 'Dark Sky',
+                humidity: 'Low Humidity',
+                wind: 'Calm Winds'
+            };
+            
+            const detailsHTML = Object.entries(scores).map(([key, score]) => {
+                let scoreColor = score >= 80 ? '#00ff88' : 
+                                score >= 60 ? '#4d7cff' : 
+                                score >= 40 ? '#ffd400' : '#ff6b35';
+                
+                return `
+                    <div class="metric-item">
+                        <span class="metric-value" style="color: ${scoreColor}">${Math.round(score)}</span>
+                        <span class="metric-label">${labels[key]}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('recommendationDetails').innerHTML = detailsHTML;
+            document.getElementById('recommendationSection').style.display = 'block';
+        }
+        
+        // ========================================
+        // CHART
+        // ========================================
+        
+        function initializeChart() {
+            const ctx = document.getElementById('skyQualityChart');
+            
+            appState.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Clear Sky %',
+                        data: [],
+                        borderColor: '#4d7cff',
+                        backgroundColor: 'rgba(77, 124, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#4d7cff',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(5, 7, 13, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#8e9aaf',
+                            borderColor: '#4d7cff',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: (context) => `Clear Sky: ${context.parsed.y}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8e9aaf',
+                                font: { size: 11 }
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8e9aaf',
+                                font: { size: 11 },
+                                callback: (value) => value + '%'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        function updateChart(data) {
+            if (!appState.chart) return;
+            
+            const hourly = data.hourly;
+            const labels = [];
+            const cloudData = [];
+            
+            for (let i = 0; i < 24 && i < hourly.time.length; i++) {
+                const time = new Date(hourly.time[i]);
+                labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }));
+                cloudData.push(100 - hourly.cloud_cover[i]);
+            }
+            
+            appState.chart.data.labels = labels;
+            appState.chart.data.datasets[0].data = cloudData;
+            appState.chart.update('none');
+        }
+        
+        // ========================================
+        // UTILITIES
+        // ========================================
+        
+        function formatTime(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) return '--:--';
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const iconMap = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+            
+            container.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="fas ${iconMap[type]}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+        }
+        
+        function setLoadingState(loading) {
+            document.getElementById('searchBtn').disabled = loading;
+            document.getElementById('geolocateBtn').disabled = loading;
+            document.getElementById('locationInput').disabled = loading;
+            document.getElementById('dateInput').disabled = loading;
+        }
+        
+        function startAutoUpdate() {
+            if (appState.updateTimer) clearInterval(appState.updateTimer);
+            
+            appState.updateTimer = setInterval(() => {
+                if (appState.currentLocation) {
+                    console.log('🔄 Auto-updating...');
+                    fetchAllData();
+                }
+            }, CONFIG.AUTO_UPDATE_INTERVAL);
+        }
+        
+        // ========================================
+        // STARTUP
+        // ========================================
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+        
+        window.addEventListener('beforeunload', () => {
+            if (appState.updateTimer) clearInterval(appState.updateTimer);
+        });
+    </script>
+</body>
+</html>
