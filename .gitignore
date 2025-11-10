@@ -1,0 +1,20 @@
+# .gitignore for StarGazer modular project
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+logs/
+*.log
+npm-debug.log*
+.env
+coverage/
+dist/
+build/
+node_modules/
+tmp/
+temp/
+*.tmp
+Thumbs.db
+
